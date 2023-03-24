@@ -1,0 +1,94 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "Prefix": {
+      "value": "ACU1"
+    },
+    "Environment": {
+      "value": "G"
+    },
+    "DeploymentID": {
+      "value": "0"
+    },
+    "Stage": {
+      "value": {
+        "RoleDefinition": 1,
+        "Security": 1,
+        "RBAC": 1,
+        "PIM": 0,
+        "SP": 1
+      }
+    },
+    "Extensions": {
+      "value": {}
+    },
+    "DeploymentInfo": {
+      "value": {
+        "rolesInfo": [
+          {
+            "Name": "BenWilkinson",
+            "RBAC": [
+              {
+                "Name": "Reader"
+              }
+            ]
+          },
+          {
+            "Name": "SimonAdams",
+            "RBAC": [
+              {
+                "Name": "Reader"
+              }
+            ]
+          }
+        ],
+        "PIMInfo": [
+          {
+            "Name": "SimonAdams-ADM",
+            "RBAC": [
+              {
+                "Name": "Owner"
+              }
+            ]
+          },
+          {
+            "Name": "BenWilkinson-ADM",
+            "RBAC": [
+              {
+                "Name": "Owner"
+              },
+              {
+                "Name": "Key Vault Administrator"
+              }
+            ]
+          }
+        ],
+        "SPInfo": [
+          // Manually add Owner on this service principal
+        ],
+        "SecurityPricingInfo": {
+          "Standard": [
+            "VirtualMachines",
+            "SqlServers",
+            "AppServices",
+            "StorageAccounts",
+            "SqlServerVirtualMachines",
+            "KeyVaults",
+            "Dns",
+            "Arm",
+            "Containers",
+            "OpenSourceRelationalDatabases",
+            "CosmosDbs"
+          ],
+          "Free": [
+            "KubernetesService",
+            "ContainerRegistry",
+            "CloudPosture"
+          ]
+        },
+        "RoleDefinitionsInfo": []
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "Global": {
+    "hubRG": {
+      "name": "P0",
+      "AppName": "HUB"
+    },
+    "hubKV": {
+      "name": "VLT01",
+      "AppName": "HUB"
+    },
+    "hubAA": {
+      "name": "OMSAutomation",
+      "AppName": "HUB"
+    },
+    "DNSServers": [
+      "10.192.248.4"
+    ],
+    "RTName": "Hub",
+    "shutdownSchedulerTimeZone": "Pacific Standard Time",
+    "patchSchedulerTimeZone": "America/Los_Angeles"
+  }
+}

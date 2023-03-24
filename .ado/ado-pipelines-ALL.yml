@@ -1,0 +1,131 @@
+parameters:
+  - name: ORG
+    displayName: ORG Code
+    type: string
+    default: PE
+    values:
+      - PE
+
+  - name: PREFIX
+    displayName: Region Prefix
+    type: string
+    default: ACU1
+    values:
+      - AEU2
+      - ACU1
+      - AEU1
+      - AWU1
+      - AWU2
+      - AWCU
+
+  - name: APP
+    displayName: App/Tenant Name
+    type: string
+    default: AOA
+    values:
+      - AOA
+      - ABC
+      - ADF
+      - HAA
+      - HUB
+      - SFM
+      - GW
+      - PST
+      - MON
+      - AKS
+      - LAB
+
+  - name: APPPRIMARY
+    displayName: App/Tenant PRIMARY Name
+    type: string
+    default: AOA
+    values:
+      - AOA
+      - HUB
+      - MON
+      - GW
+      - AKS
+
+  - name: ENV
+    displayName: Environment Name
+    type: string
+    default: D1
+
+  - name: SP
+    displayName: Service principal name
+    type: string
+
+  - name: SPG0
+    displayName: Global Service principal name
+    type: string
+
+  - name: UAI
+    displayName: Switch to use the UAI for Global
+    type: string
+    default: 0
+    values:
+      - 0
+      - 1
+
+  - name: POOL
+    displayName: Switch to use the UAI for Global
+    type: string
+    default: pool02
+    values:
+      - pool01
+      - pool02
+
+  - name: POOLPrefix
+    displayName: Switch to region for the pool
+    type: string
+    default: aeu1
+    values:
+      - aeu1
+      - aeu2
+
+  - name: FullUpload
+    displayName: Switch to upload artifacts
+    type: boolean
+    default: false
+
+jobs:
+  - job: JOB_00_ALL_SUB__${{ parameters.PREFIX }}_${{ parameters.ORG }}_${{ parameters.APP }}_RG_${{ parameters.ENV }}
+    pool:
+      ${{ if eq(parameters.UAI, 1) }}:
+        name: ${{ parameters.POOLPrefix }}-${{ parameters.ORG }}-${{ parameters.APPPRIMARY }}-p0-${{ parameters.POOL }}
+      ${{ else }}:
+        vmImage: ubuntu-latest
+
+    steps:
+      - task: AzurePowerShell@5
+        inputs:
+          ${{ if eq(parameters.UAI, 0) }}:
+            azureSubscription: ${{ parameters.SPG0 }}-G0
+          ${{ else }}:
+            azureSubscription: ${{ parameters.SPG0 }}-G0_UAI
+          ScriptType: "FilePath"
+          ScriptPath: "ADF/release-az/BicepDeploy.ps1"
+          ScriptArguments: '-app ${{ parameters.APP }} -env ${{ parameters.ENV }} -Prefix ${{ parameters.PREFIX }} -stage "00-ALL-SUB"'
+          FailOnStandardError: true
+          azurePowerShellVersion: "LatestVersion"
+          preferredAzurePowerShellVersion: 8.0.0
+          pwsh: true
+
+  - job: JOB_01_ALL_RG__${{ parameters.PREFIX }}_${{ parameters.ORG }}_${{ parameters.APP }}_RG_${{ parameters.ENV }}
+    dependsOn: JOB_00_ALL_SUB__${{ parameters.PREFIX }}_${{ parameters.ORG }}_${{ parameters.APP }}_RG_${{ parameters.ENV }}
+    timeoutInMinutes: 240
+    pool:
+      vmImage: ubuntu-latest
+      # pool: AZC1-S1-Infra
+
+    steps:
+      - task: AzurePowerShell@5
+        inputs:
+          azureSubscription: ${{ parameters.SP }}-${{ parameters.ENV }}
+          ScriptType: "FilePath"
+          ScriptPath: "ADF/release-az/BicepDeploy.ps1"
+          ScriptArguments: '-app ${{ parameters.APP }} -env ${{ parameters.ENV }} -Prefix ${{ parameters.PREFIX }} -stage "01-ALL-RG" -FullUpload:$${{ parameters.FullUpload }}'
+          FailOnStandardError: true
+          azurePowerShellVersion: "LatestVersion"
+          preferredAzurePowerShellVersion: 8.0.0
+          pwsh: true
